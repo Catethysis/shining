@@ -16,6 +16,9 @@
 	.grid-child {
 		height: 100vh;
 	}
+	#selected_object {
+		color: #ccc;
+	}
 </style>
 <body>
 	<script type="module">
@@ -117,11 +120,13 @@
 			window.addEventListener('mousemove', onMouseMove);
 			window.addEventListener('mousedown', onMouseDown);
 
+			const raycaster_fire = new THREE.Raycaster();
+			raycaster_fire.layers.set(1);
 			const fire = ({pos, d, medium, depth}) => {
 				// console.log("===========================", medium, depth)
-				raycaster.set(pos, d.normalize())
+				raycaster_fire.set(pos, d.normalize())
 				// console.log(pos, d.normalize())
-				const intersect = raycaster.intersectObjects(scene.children)
+				const intersect = raycaster_fire.intersectObjects(scene.children)
 				// console.log(intersect[0])
 				let collide = 0
 				if (intersect[0])
@@ -160,7 +165,7 @@
 				// draw_line([new THREE.Vector3(0,0,0), new THREE.Vector3(0.3,0,0)])
 				// draw_line([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0.1,0)])
 				// draw_line([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0.2)])
-				let x = 0.0, y = 0.0, delta = 0.1
+				let x = 0.0, y = 0.0, delta = 1
 				console.time()
 				for(y = -1.0; y <= 1.0; y += delta)
 					for(x = -1.0; x <= 1.0; x += delta)
@@ -200,16 +205,17 @@
 
 		// const 
 
-		const raycaster = new THREE.Raycaster();
-		raycaster.layers.set(1);
+		const raycaster_mouse = new THREE.Raycaster();
+		raycaster_mouse.layers.set(1);
+		raycaster_mouse.layers.enable(2);
 		function onMouseDown(event) {
-			raycaster.setFromCamera(mouse, camera);
-			const intersection = raycaster.intersectObjects(scene.children);
+			raycaster_mouse.setFromCamera(mouse, camera);
+			const intersection = raycaster_mouse.intersectObjects(scene.children);
 			if (intersection.length > 0) {
 				const instance = intersection[0]//.instanceId;
-				// console.log(instance)
+				document.getElementById("selected_object").textContent = "Selected object: " + instance.object.name;
 				// const object = objects[intersection[0].object.id]
-				// console.log(object)
+				console.log(instance.object.name)
 				// instance.face.color.setRGB( Math.random(),Math.random(), Math.random())
 				// console.log(instance)
 			}
@@ -230,6 +236,7 @@
 	<div class="grid-container">
 		<div class="grid-child" id="viewport"></div>
 		<div class="grid-child" id="data">
+			<div id="selected_object"></div>
 			<button class="mdc-button mdc-button--raised">
 				<span class="mdc-button__label">File</span>
 			</button>
